@@ -1,0 +1,187 @@
+/*################Table基本表##############*/
+#用户（UID、用户名、QQ、姓名、性别、学校、生日、年龄)
+CREATE TABLE Users(
+    UID NUMERIC(10) PRIMARY KEY, 		   #UID
+    Username VARCHAR(12)UNIQUE NOT NULL,   	   #用户名
+    Realname VARCHAR(16) NOT NULL,	  	   #姓名
+    Sex CHAR(2) NOT NULL, 			   #性别
+    School VARCHAR(50) NOT NULL,  	           #学校
+    Birthday DATE NOT NULL,   		   	   #生日, CONVERT(varchar(100), GETDATE(), 102)格式2017.12.24
+    Age SMALLINT NOT NULL	    		   #年龄，由生日计算得
+);
+
+
+#登陆信息（UID、用户名、电子邮箱、QQ、wechat、手机号、密码）
+CREATE TABLE Login(
+    UID NUMERIC(10)PRIMARY KEY,		    #UID 
+    Username VARCHAR(12) UNIQUE NOT NULL,   #用户名
+    Email VARCHAR(32) NOT NULL,		    #邮箱
+    QQ VARCHAR(11) NOT NULL,		    #QQ
+    Wechat VARCHAR(20) UNIQUE,              #微信
+    Phonenumber CHAR(11) UNIQUE,	    #手机号码
+    Password VARCHAR(16) NOT NULL,	    #密码
+    FOREIGN KEY(Username) REFERENCES Users(Username)
+);
+
+
+
+#注册信息（UID、用户名、学号、姓名、学校、专业、身份证号）
+#缓存表，不必定义约束条件
+CREATE TABLE register(
+    UID NUMERIC(10),		    #UID
+    Username VARCHAR(12),	    #用户名
+    StudentID VARCHAR(13),	    #学号
+    Realname VARCHAR(16),  	    #姓名
+    School VARCHAR(50),	    	    #学校
+    Major VARCHAR(20),		    #专业
+    ID VARCHAR(18)		    #身份证号
+);
+
+#匹配测试问卷（UID、项目号1-n）
+CREATE TABLE Matchmaking(
+    UID NUMERIC(10),			  #UID
+    Item1 VARCHAR(20),		  #项目号，对应项目内容
+    Item2 VARCHAR(20),
+    Item3 VARCHAR(20),
+    Item4 VARCHAR(20),
+    Item5 VARCHAR(20),
+    Item6 VARCHAR(20),
+    Item7 VARCHAR(20),
+    Item8 VARCHAR(20),
+    Item9 VARCHAR(20),
+    Item10 VARCHAR(20),
+    Item11 VARCHAR(20),
+    Item12 VARCHAR(20),
+    Item13 VARCHAR(20),
+    PRIMARY KEY(UID),		
+    FOREIGN KEY(UID) REFERENCES Users(UID)
+);
+
+
+#匹配关系（UID1、UID2、匹配度）
+CREATE TABLE Matches(
+    UID1 NUMERIC(10),			   #UID1
+    UID2 NUMERIC(10),			   #UID2
+
+    Matches SMALLINT  NOT NULL DEFAULT 85,  #匹配度
+    PRIMARY KEY(UID1,UID2),
+    FOREIGN KEY(UID1) REFERENCES Users(UID),
+    FOREIGN KEY(UID2) REFERENCES Users(UID)
+);
+
+#博文游记（作者、标题、内容、发布时间）
+CREATE TABLE Essay(
+    Username VARCHAR(12),		#作者
+    Title VARCHAR(16),			#标题
+    Content TEXT NOT NULL,		#内容
+    theDate DATE NOT NULL,		#发布时间
+    PRIMARY KEY(Username,Title),
+    FOREIGN KEY(Username) REFERENCES Users(Username)
+);
+
+
+#游记评论（UID、标题、评论内容）
+CREATE TABLE Comments(
+    UID NUMERIC(10),		   #UID
+    Title VARCHAR(16),             #标题
+    Content TEXT NOT NULL, #内容
+    PRIMARY KEY(UID,Title),
+    FOREIGN KEY(UID) REFERENCES Users(UID),
+    FOREIGN KEY(Title) REFERENCES Essay(Title)
+);
+
+#留言（UID、用户名、留言内容）
+CREATE TABLE Words(
+    UID NUMERIC(10),		  #UID
+    UserName VARCHAR(12),         #用户名
+    Content TEXT NOT NULL,#内容
+    PRIMARY KEY(UID,Username),
+    FOREIGN KEY(UID) REFERENCES Users(UID),
+    FOREIGN KEY(UserName) REFERENCES Users(UserName)    
+);
+
+#伴游邀请
+CREATE TABLE Invitation(
+    UID NUMERIC(10), 	#UID
+    Title VARCHAR(16),	#标题
+    Content TEXT NOT NULL,		#内容
+    theDate DATE NOT NULL,		#发布日期
+    img mediumblob，			#图片
+    PRIMARY KEY(UID,Title), 
+    FOREIGN KEY (UID) REFERENCES users(UID)
+)
+
+
+/*################View视图##############*/
+#常用信息（UID，用户名，性别，电子邮箱，QQ，微信，手机号码，密码）
+CREATE VIEW Basicinfo
+AS
+SELECT Users.UID,Users.Username,Sex,Email,QQ,Wechat,Password
+FROM Users,Login
+WHERE Users.UID=Login.UID
+/
+
+
+#敏感信息（UID，姓名，学校，生日， 电子邮箱，QQ，微信，手机号码）
+CREATE VIEW SensitiveInfo
+AS
+SELECT Users.UID,Realname,School,Birthday,Email,QQ,Wechat,Phonenumber
+FROM Users,Login
+WHERE Users.UID=Login.UID
+GO
+
+#普通信息（UID，用户名）
+CREATE VIEW CommonInfo
+AS
+SELECT UID,Username
+FROM Login
+
+
+
+
+/*################Index索引##############*/
+
+#Users表：UID和Username上建立hash索引
+CREATE INDEX index_users ON Users(UID,Username)
+
+
+#Login表：UID上建立hash索引
+CREATE INDEX index_login ON Login(UID)
+
+
+/*##############-Trigger触发器##############*/
+使用PHP函数代替Trigger，以提高效率
+
+/*##########Procedure存储过程和Function函数##########*/
+#查询指定用户名的用户常用信息
+CREATE PROCEDURE query_ubi(IN un VARCHAR(12))
+BEGIN
+   SELECT *
+   FROM Basicinfo
+   WHERE Basicinfo.Username=un
+END
+
+#查询指定用户名的用户敏感信息
+CREATE PROCEDURE query_usi(IN un VARCHAR(12))
+BEGIN
+    SELECT *
+    FROM SensitiveInfo
+    WHERE SensitiveInfo.Username=un
+END
+
+#Users表插入记录
+CREATE PROCEDURE insert_user(IN id NUMERIC(10),IN un VARCHAR(12),IN rm VARCHAR(16),
+IN sx VARCHAR(16),IN sc VARCHAR(50),IN bd DATETIME, IN age SMALLINT, IN wt VARCHAR(20))
+BEGIN
+    INSERT
+    INTO User(UID,Username,Realname,Sex,School,Birthday,Age,Wechat)
+    VALUES(id,un,rm,sx,sc,bd,age,wt)
+END
+
+/*###########系统表###########-*/
+CREATE TABLE checktable(
+    School VARCHAR(50) PRIMARY KEY,	    #学校
+    StudentID VARCHAR(13)	    #学号区间
+)
+
+
