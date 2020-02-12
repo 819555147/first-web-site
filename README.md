@@ -1,4 +1,1 @@
-# first-web-site
-my first try.
-The structure is a bit chaotic.
-backend use php.
+效果见网站截图。
