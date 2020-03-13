@@ -9,7 +9,7 @@ ps:浏览器自带截图软件有些问题，导致有些页面显示错位，�
 * **`游记模块`**  
 ![游记模块](https://github.com/RichardcLee/self-made-tools/blob/master/WeTravel%E7%BD%91%E7%AB%99%E6%88%AA%E5%9B%BE/for%20show/%E6%B8%B8%E8%AE%B0%E6%A8%A1%E5%9D%97%EF%BC%88%E6%88%AA%E5%9B%BE%E5%AF%BC%E8%87%B4%E5%9B%BE%E7%89%87%E4%B8%8D%E6%98%BE%E7%A4%BA%EF%BC%89.jpg)
 
-** **`某篇游记`**  
+* **`某篇游记`**  
 ![某篇游记](https://github.com/RichardcLee/self-made-tools/blob/master/WeTravel%E7%BD%91%E7%AB%99%E6%88%AA%E5%9B%BE/for%20show/%E6%9F%90%E7%AF%87%E6%B8%B8%E8%AE%B0.jpg)
 
 * **`攻略模块`**  
